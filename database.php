@@ -2,9 +2,9 @@
 
 class Database {
     private $host = 'localhost';
-    private $db_name = 'basic-php-crud';
+    private $db_name = 'php-crud';
     private $username = 'root';
-    private $password = '';
+    private $password = 'root';
     private $options = [
         PDO::ATTR_ERRMODE            => PDO::ERRMODE_EXCEPTION, // throws exceptions
         PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC, // fetches an associative array

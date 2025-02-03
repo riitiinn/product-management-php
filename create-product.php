@@ -31,8 +31,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                     <label for="product_price">Product Price</label>
                     <input type="number" step="0.01" class="form-control" id="product_price" name="product_price" required>
                 </div>
-                <button type="submit" class="btn btn-primary">Create Product</button>
-                <button type="button" class="btn btn-warning btn-back">Go Back</button>
+                <button type="submit" class="btn" style="background-color: #033047; color: white;">Create Product</button>
+                <button type="button" class="btn btn-back" style="background-color: #d9d9d9; color: black;">Go Back</button>
             </form>
         </div>
     </div>

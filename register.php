@@ -1,59 +1,126 @@
+<?php
+include 'database.php'; // Ensure this file correctly sets up a PDO connection
+
+// Initialize database connection
+$db = new Database();
+$conn = $db->getConnection();
+
+$error = ""; // Variable for storing error messages
+
+if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['register'])) {
+    $firstName = trim($_POST['firstName']);
+    $lastName = trim($_POST['lastName']);
+    $username = trim($_POST['username']);
+    $email = trim($_POST['email']);
+    $password = $_POST['password'];
+    $confirm_password = $_POST['confirm_password'];
+
+    // Check if passwords match
+    if ($password !== $confirm_password) {
+        $error = "Passwords do not match.";
+    } else {
+        // Hash the password
+        $hashed_pass = password_hash($password, PASSWORD_DEFAULT);
+
+        // Check if email already exists
+        $stmt = $conn->prepare("SELECT id FROM users WHERE email = ?");
+        $stmt->execute([$email]);
+
+        if ($stmt->rowCount() > 0) {
+            $error = "Email already registered. Try logging in.";
+        } else {
+            // Insert user into the database
+            $stmt = $conn->prepare("INSERT INTO users (firstName, lastName, username, email, password) VALUES (?, ?, ?, ?, ?)");
+            if ($stmt->execute([$firstName, $lastName, $username, $email, $hashed_pass])) {
+                // Redirect to login page on successful registration
+                header("Location: login.php?signup=success");
+                exit();
+            } else {
+                $error = "Error: Could not complete signup.";
+            }
+        }
+    }
+}
+?>
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Register</title>
-    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <title>Signup Form</title>
+    <link rel="stylesheet" href="styles.css">
     <style>
         body {
-            background-color: #f8f9fa;
+            font-family: Arial, sans-serif;
+            background-color: #033047;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
         }
-        .register-container {
-            margin-top: 50px;
+
+        .container {
+            background: white;
+            padding: 20px;
+            border-radius: 5px;
+            box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+            width: 300px;
+            text-align: center;
         }
-        .register-form {
-            background: #fff;
-            padding: 30px;
-            border-radius: 10px;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+
+        input {
+            width: 90%;
+            padding: 10px;
+            margin: 10px 0;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+
+        button {
+            width: 100%;
+            padding: 10px;
+            background-color: #033047;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #D9D9D9;
+            color: rgb(0, 0, 0);
+        }
+
+        /* Error Message Styling */
+        .error-message {
+            color: red;
+            font-size: 14px;
+            margin-top: 10px;
         }
     </style>
 </head>
 <body>
-    <div class="container register-container">
-        <div class="row justify-content-center">
-            <div class="col-md-6">
-                <div class="register-form">
-                    <h2 class="text-center">Register</h2>
-                    <form action="register_process.php" method="POST">
-                        <div class="form-group">
-                            <label for="name">Name</label>
-                            <input type="text" class="form-control" id="name" name="name" required>
-                        </div>
-                        <div class="form-group">
-                            <label for="email">Email</label>
-                            <input type="email" class="form-control" id="email" name="email" required>
-                        </div>
-                        <div class="form-group">
-                            <label for="password">Password</label>
-                            <input type="password" class="form-control" id="password" name="password" required>
-                        </div>
-                        <div class="form-group">
-                            <label for="confirm_password">Confirm Password</label>
-                            <input type="password" class="form-control" id="confirm_password" name="confirm_password" required>
-                        </div>
-                        <button type="submit" class="btn btn-primary btn-block">Register</button>
-                    </form>
-                    <p class="text-center mt-3">
-                        Already have an account? <a href="login.php">Login here</a>
-                    </p>
-                </div>
-            </div>
-        </div>
+    <div class="container">
+        <h2>Signup</h2>
+
+        <!-- Display Error Message if Exists -->
+        <?php if (!empty($error)): ?>
+            <p class="error-message"><?php echo $error; ?></p>
+        <?php endif; ?>
+
+        <form action="register.php" method="POST">
+            <input type="text" name="firstName" placeholder="First Name" required>
+            <input type="text" name="lastName" placeholder="Last Name" required>
+            <input type="text" name="username" placeholder="Username" required>
+            <input type="email" name="email" placeholder="Email" required>
+            <input type="password" name="password" placeholder="Password" required>
+            <input type="password" name="confirm_password" placeholder="Confirm Password" required>
+            <button type="submit" name="register">Sign Up</button>
+        </form>
+
+        <p>Already have an account? <a href="login.php">Login</a></p>
     </div>
-    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
-    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
 </body>
 </html>

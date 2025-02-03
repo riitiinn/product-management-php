@@ -8,11 +8,12 @@ require 'partial/header.php'; // Include your header file
 //     exit;
 // }
 ?>
-<div class="container">
-    <h1>Product Management</h1>
-    <div class="d-flex justify-content-center align-items-center">
+
+<div  >
+    <h1 class="container d-flex flex-column align-items-center justify-center" style="font-size: 60px !important;font-family: 'Roboto', sans-serif;">Product Management</h1>
+    <div class="d-flex justify-content-center align-items-center" style="margin-bottom: 20px; ">
         <!-- <h2 class="mr-3">Product List</h2> -->
-        <a href="create-product.php" class="btn btn-primary btn-sm">Add Product</a>
+        <a href="create-product.php" class="btn btn-lg" style="background-color: #033047; color: white;">Add Product</a>
     </div>
     <div class="row justify-content-center">
         <div class="col-md-8">
@@ -21,6 +22,7 @@ require 'partial/header.php'; // Include your header file
                     <tr>
                         <th>S.N.</th>
                         <th>Name</th>
+                        <th>Description</th>
                         <th>Price</th>
                         <th>Actions</th>
                     </tr>
@@ -35,12 +37,13 @@ require 'partial/header.php'; // Include your header file
                 foreach ($products as $p): ?>
                     <tr>
                         <td><?= $i++; ?></td> <!-- Increment the counter variable -->
-                        <td><?= $p['title']; ?></td> <!-- Access the product name from the $product array -->
+                        <td><?= $p['title']; ?></td>
+                        <td><?= $p['description']; ?></td> <!-- Access the product name from the $product array -->
                         <td><?= $p['price']; ?></td> <!-- Access the product price from the $product array -->
                         <td>
                             <!-- The `<a>` tag is creating a hyperlink that directs the user to the "edit-product.php" page with a specific
                             product ID appended as a query parameter in the URL. We can access such input by using $_GET['id'] in the "edit-product.php" page. -->
-                            <a href="edit-product.php?id=<?= $p['id']; ?>" class="btn btn-primary btn-sm">Update</a>
+                            <a href="edit-product.php?id=<?= $p['id']; ?>" style="background-color: #033047; color: white;" class="btn btn-sm">Update</a>
 
 
                             <!-- The provided HTML form is used to delete a product entry from the
@@ -61,6 +64,5 @@ require 'partial/header.php'; // Include your header file
             </table>
         </div>
     </div>
+    
 </div>
-
-<?php require 'partial/footer.php'; // Include your footer file ?>

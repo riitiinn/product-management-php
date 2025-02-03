@@ -1,51 +1,126 @@
+<?php
+include 'database.php'; // Ensure this file contains your PDO connection setup
+
+$db = new Database();
+$conn = $db->getConnection();
+
+if ($_SERVER["REQUEST_METHOD"] == "POST") {
+    $username = $_POST['username'];
+    $password = $_POST['password'];
+
+    // Use a prepared statement to prevent SQL injection
+    $sql = "SELECT * FROM users WHERE username = :username";
+    $stmt = $conn->prepare($sql);
+    $stmt->bindParam(':username', $username);
+    $stmt->execute();
+
+    // Fetch the user data
+    $row = $stmt->fetch(PDO::FETCH_ASSOC);
+
+    if ($row) { // Check if user exists
+        if (password_verify($password, $row['password'])) {
+          header("Location: index.php");
+          exit();
+            echo "Login successful.";
+        } else {
+            echo "Invalid credentials.";
+        }
+    } else {
+        echo "No user found.";
+    }
+}
+
+?>
+
+<!-- login.html -->
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Register</title>
-    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <title>Login</title>
+    <link rel="stylesheet" type="text/css" href="./assets/css/style.css">
     <style>
-        body {
-            background-color: #f8f9fa;
-        }
-        .register-container {
-            margin-top: 50px;
-        }
-        .register-form {
-            background: #fff;
-            padding: 30px;
-            border-radius: 10px;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-        }
+    body {
+  padding: 20px; 
+  background-color: #033047; /* Maroon background */
+  font-family: Arial, sans-serif;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  margin: 0;
+}
+
+.container {
+  background: white;
+  padding: 20px;
+  width: 30%;
+  border-radius: 10px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+  text-align: center;
+}
+
+h2 {
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+form {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+}
+
+input {
+  width: 80%;
+  padding: 10px;
+  margin: 10px 0;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  text-align: center;
+}
+
+button {
+  background: #033047; /* Maroon button */
+  color: white;
+  border: none;
+  padding: 10px;
+  border-radius: 5px;
+  cursor: pointer;
+  width: 85%;
+  margin-top: 10px;
+}
+
+button:hover {
+  background: #D9D9D9;
+  color:black;
+}
+
+p {
+  margin-top: 15px;
+}
+
+a {
+  color: #007bff;
+  text-decoration: none;
+}
+
+a:hover {
+  text-decoration: underline;
+}
+
+
     </style>
 </head>
-<body>
-    <div class="container register-container">
-        <div class="row justify-content-center">
-            <div class="col-md-6">
-                <div class="register-form">
-                    <h2 class="text-center">Login</h2>
-                    <form action="login_process.php" method="POST">
-                        <div class="form-group">
-                            <label for="email">Email</label>
-                            <input type="email" class="form-control" id="email" name="email" required>
-                        </div>
-                        <div class="form-group">
-                            <label for="password">Password</label>
-                            <input type="password" class="form-control" id="password" name="password" required>
-                        </div>
-                        <button type="submit" class="btn btn-primary btn-block">Login</button>
-                    </form>
-                    <p class="text-center mt-3">
-                        Don't have an account? <a href="register.php">Register here</a>
-                    </p>
-                </div>
-            </div>
-        </div>
+<body> 
+    <div class="container">
+        <h2>Login</h2>
+        <form action="login.php" method="POST">
+            <input type="text" name="username" placeholder="Username" required>
+            <input type="password" name="password" placeholder="Password" required>
+            <button type="submit">Login</button>
+        </form>
+        <p>Don't have an account? <a href="register.php">Signup</a></p>
     </div>
-    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
-    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
 </body>
 </html>
