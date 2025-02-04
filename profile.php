@@ -9,6 +9,7 @@ $userId = isset($_SESSION['user_id']) ? $_SESSION['user_id'] : null;
 $user = null;
 if ($userId) {
     $user = $db->select("SELECT * FROM users WHERE id = ?", [$userId]);
+    $imageUrl = $user[0]['profileUrl'];
     if ($user) {
         $user = $user[0]; // Assuming select returns an array of results
     }
@@ -26,7 +27,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && $userId) {
         $updateQuery = "UPDATE users SET firstname = ?, lastname = ?, username = ?, email = ?, phone = ? WHERE id = ?";
         $db->update($updateQuery, [$firstname, $lastname, $username, $email, $phone, $userId]);
 
-        header("Location: index.php"); // Redirect after updating
+        header("Location: dashboard.php"); // Redirect after updating
         exit;
     } else {
         echo "All fields are required.";
@@ -128,11 +129,10 @@ button:hover {
 <div class="container-box" >
     <form action="" method="post" enctype="multipart/form-data" style="width:80%">
         <h2>Profile</h2>
-        <!-- <img src="<?php echo $user['profile_photo']; ?>" alt="Profile Photo"> -->
 
         <div class="avatar-container" onclick="document.getElementById('avatarUpload').click();">
         <!-- Default avatar image (change the source if needed) -->
-        <img id="avatarImage" src="../images/boy.png" alt="Avatar" />
+        <img id="avatarImage" src="<?php echo $user['profileUrl']; ?>" alt="Avatar" />
         <div class="upload-overlay">Upload Photo</div>
       </div>
       <!-- Hidden file input -->

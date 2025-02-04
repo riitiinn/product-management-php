@@ -15,6 +15,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['register'])) {
     $password = $_POST['password'];
     $confirm_password = $_POST['confirm_password'];
 
+    $photoPath = null;
+    $error = null;
+
  
     if ($password !== $confirm_password) {
         $error = "Passwords do not match.";
@@ -29,9 +32,51 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['register'])) {
         if ($stmt->rowCount() > 0) {
             $error = "Email already registered. Try logging in.";
         } else {
+
+            // Handle file upload
+              if (isset($_FILES['photo']) && $_FILES['photo']['error'] === UPLOAD_ERR_OK) {
+                $fileTmpPath   = $_FILES['photo']['tmp_name'];
+                $fileName      = $_FILES['photo']['name'];
+                $fileNameCmps  = explode(".", $fileName);
+                $fileExtension = strtolower(end($fileNameCmps));
+
+                $allowedfileExtensions = array('jpg', 'jpeg', 'png', 'gif');
+                if (!in_array($fileExtension, $allowedfileExtensions)) {
+                    $error = "Upload failed. Allowed file types: " . implode(', ', $allowedfileExtensions);
+                } else {
+                    // Use absolute path for directory
+                    $uploadFileDir = __DIR__ . '/assets/images/';
+                    
+                    // Create directory if it doesn't exist
+                    if (!is_dir($uploadFileDir)) {
+                        if (!mkdir($uploadFileDir, 0755, true)) {
+                            $error = "Failed to create upload directory.";
+                        }
+                    }
+
+                    if (!$error) {
+                        $newFileName = md5(time() . $fileName) . '.' . $fileExtension;
+                        $dest_path = $uploadFileDir . $newFileName;
+
+                        if (move_uploaded_file($fileTmpPath, $dest_path)) {
+                            $photoPath = 'assets/images/' . $newFileName;
+                        } else {
+                            $error = "Failed to move uploaded file. Check directory permissions. Temp: $fileTmpPath, Dest: $dest_path";
+                            error_log($error);
+                        }
+                    }
+                }
+              } elseif (isset($_FILES['photo'])) {
+                $error_code = $_FILES['photo']['error'];
+                if ($error_code !== UPLOAD_ERR_NO_FILE) {
+                    $error = "File upload error. Code: " . $error_code;
+                    error_log($error);
+                }
+              }
+
        
-            $stmt = $conn->prepare("INSERT INTO users (firstname, lastname, username, email,phone, password) VALUES (?, ?, ?, ?, ?, ?)");
-            if ($stmt->execute([$firstname, $lastname, $username,$phone, $email, $hashed_pass])) {
+            $stmt = $conn->prepare("INSERT INTO users (firstname, lastname, username, email,phone, password, profileUrl) VALUES (?, ?, ?, ?, ?, ?,? )");
+            if ($stmt->execute([$firstname, $lastname, $username, $email,$phone, $hashed_pass, $photoPath])) {
                
                 header("Location: login.php?signup=success");
                 exit();
@@ -174,14 +219,14 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['register'])) {
             <p class="error-message"><?php echo $error; ?></p>
         <?php endif; ?>
 
-        <form action="register.php" method="POST">
-        <div class="avatar-container" onclick="document.getElementById('avatarUpload').click();">
-        <!-- Default avatar image (change the source if needed) -->
-        <img id="avatarImage" src="../images/boy.png" alt="Avatar" />
-        <div class="upload-overlay">Upload Photo</div>
-      </div>
-      <!-- Hidden file input -->
-      <input type="file" id="avatarUpload" name="photo" accept="image/*" onchange="previewAvatar(event)" />
+        <form action="register.php" method="POST" enctype="multipart/form-data">
+            <div class="avatar-container" onclick="document.getElementById('avatarUpload').click();">
+              <!-- Default avatar image (change the source if needed) -->
+                <img id="avatarImage" src="assets/images/ava.png" alt="Avatar" />
+                <div class="upload-overlay">Upload Photo</div>
+            </div>
+            <!-- Hidden file input -->
+            <input type="file" id="avatarUpload" name="photo" accept="image/*" onchange="previewAvatar(event)" />
             <input type="text" name="firstname" placeholder="First Name" required>
             <input type="text" name="lastname" placeholder="Last Name" required>
             <input type="email" name="email" placeholder="Email" required>
