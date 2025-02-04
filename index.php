@@ -1,5 +1,5 @@
 <?php
-require 'database.php'; // Include your database connection file
+require 'database.php'; 
 require 'partial/header.php';
 session_start();
 
