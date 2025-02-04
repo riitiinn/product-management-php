@@ -1,19 +1,54 @@
 <?php
-// session_start();
 require 'database.php'; // Include your database connection file
-require 'partial/header.php'; // Include your header file
-// Check if user is logged in
-// if (!isset($_SESSION['user_id'])) {
-//     echo "You need to log in to access this page.";
-//     exit;
-// }
+require 'partial/header.php';
+session_start();
+
+$db = new Database();
+$userId = isset($_SESSION['user_id']) ? $_SESSION['user_id'] : null;
+
+$user = null;
+if ($userId) {
+    $user = $db->select("SELECT * FROM users WHERE id = ?", [$userId]);
+    if ($user) {
+        $user = $user[0]; 
+    }
+}
 ?>
 
-<div  >
-    <h1 class="container d-flex flex-column align-items-center justify-center" style="font-size: 60px !important;font-family: 'Roboto', sans-serif;">Product Management</h1>
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Welcome  <?php echo $user['firstname'] ?></title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+
+<nav class="navbar navbar-expand-lg navbar-light " style="background-color: #d9d9d9;">
+        <div class="container">
+            <a class="navbar-brand" href="dashboard.php" style="font-size:30px">Dashboard</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto" style="font-size:20px"  >
+                    <li class="nav-item"><a class="nav-link" href="dashboard.php">Home</a></li>
+                    <li class="nav-item"><a class="nav-link" href="index.php">Product</a></li>
+                    <li class="nav-item"><a class="nav-link" href="profile.php">Profile</a></li>
+                    <li class="nav-item"><a class="nav-link" href="login.php">Logout</a></li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+    
+    <div >
+    <div style="min-height:85vh; display:flex; flex-direction:column; width:100%;  justify-content:center;background-color: #033047; color: white; ">
+    <h1 class="container d-flex justify-content-center" style="font-size: 60px !important;font-family: 'Roboto', sans-serif;">Product Management</h1>
     <div class="d-flex justify-content-center align-items-center" style="margin-bottom: 20px; ">
         <!-- <h2 class="mr-3">Product List</h2> -->
-        <a href="create-product.php" class="btn btn-lg" style="background-color: #033047; color: white;">Add Product</a>
+        <a href="create-product.php" class="btn btn-lg" style="background-color: #d9d9d9; color: black;">Add Product</a>
     </div>
     <div class="row justify-content-center">
         <div class="col-md-8">
@@ -64,5 +99,13 @@ require 'partial/header.php'; // Include your header file
             </table>
         </div>
     </div>
-    
+    </div>
+    <footer class="text-center py-3" style="background-color: #d9d9d9; color: black;">
+        <p>&copy; Profile management. All rights reserved.</p>
+    </footer>
 </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
+

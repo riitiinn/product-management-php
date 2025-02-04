@@ -1,4 +1,6 @@
 <?php
+session_start();
+
 include 'database.php'; // Ensure this file contains your PDO connection setup
 
 $db = new Database();
@@ -19,7 +21,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
     if ($row) { // Check if user exists
         if (password_verify($password, $row['password'])) {
-          header("Location: index.php");
+          $_SESSION['user_id'] = $row['id'];
+          header("Location: dashboard.php");
           exit();
             echo "Login successful.";
         } else {
@@ -29,7 +32,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         echo "No user found.";
     }
 }
-
 ?>
 
 <!-- login.html -->

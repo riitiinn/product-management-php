@@ -1,38 +1,38 @@
-<?php
-include 'database.php'; // Ensure this file correctly sets up a PDO connection
+ <?php
+include 'database.php'; 
 
-// Initialize database connection
 $db = new Database();
 $conn = $db->getConnection();
 
-$error = ""; // Variable for storing error messages
+$error = ""; 
 
 if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['register'])) {
-    $firstName = trim($_POST['firstName']);
-    $lastName = trim($_POST['lastName']);
+    $firstname = trim($_POST['firstname']);
+    $lastname = trim($_POST['lastname']);
     $username = trim($_POST['username']);
+    $phone = trim($_POST['phone']);
     $email = trim($_POST['email']);
     $password = $_POST['password'];
     $confirm_password = $_POST['confirm_password'];
 
-    // Check if passwords match
+ 
     if ($password !== $confirm_password) {
         $error = "Passwords do not match.";
     } else {
-        // Hash the password
+   
         $hashed_pass = password_hash($password, PASSWORD_DEFAULT);
 
-        // Check if email already exists
+
         $stmt = $conn->prepare("SELECT id FROM users WHERE email = ?");
         $stmt->execute([$email]);
 
         if ($stmt->rowCount() > 0) {
             $error = "Email already registered. Try logging in.";
         } else {
-            // Insert user into the database
-            $stmt = $conn->prepare("INSERT INTO users (firstName, lastName, username, email, password) VALUES (?, ?, ?, ?, ?)");
-            if ($stmt->execute([$firstName, $lastName, $username, $email, $hashed_pass])) {
-                // Redirect to login page on successful registration
+       
+            $stmt = $conn->prepare("INSERT INTO users (firstname, lastname, username, email,phone, password) VALUES (?, ?, ?, ?, ?, ?)");
+            if ($stmt->execute([$firstname, $lastname, $username,$phone, $email, $hashed_pass])) {
+               
                 header("Location: login.php?signup=success");
                 exit();
             } else {
@@ -41,7 +41,28 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['register'])) {
         }
     }
 }
-?>
+
+// session_start();
+// require_once './includes/db.php';
+// require_once './includes/functions.php';
+
+// if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+//     $firstname = sanitizeInput($_POST['firstname']);
+//     $lastname = sanitizeInput($_POST['lastname']);
+//     $username = sanitizeInput($_POST['username']);
+//     $email = sanitizeInput($_POST['email']);
+//     $phone = sanitizeInput($_POST['phone']);
+//     $password = password_hash($_POST['password'], PASSWORD_BCRYPT);
+
+//     $stmt = $pdo->prepare("INSERT INTO users (firstname, lastname, username, email,phone, password) VALUES (?, ?, ?, ?, ?, ?)");
+//     if ($stmt->execute([$firstname, $lastname, $username, $email, $phone, $password])) {
+//         $_SESSION['user_id'] = $pdo->lastInsertId();
+//         redirect('index.php');
+//     } else {
+//         $error = "Registration failed. Please try again.";
+//     }
+// }
+?> 
 
 <!DOCTYPE html>
 <html lang="en">
@@ -99,6 +120,49 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['register'])) {
             font-size: 14px;
             margin-top: 10px;
         }
+          /* Avatar Container Styles */
+    .avatar-container {
+      width: 150px;
+      height: 150px;
+      margin: 0 auto 20px auto;
+      position: relative;
+      border-radius: 50%;
+      overflow: hidden;
+      border: 2px solid #ddd;
+      background: #f1f1f1;
+      cursor: pointer;
+    }
+
+    .avatar-container img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+
+    /* Overlay button on avatar */
+    .avatar-container .upload-overlay {
+      position: absolute;
+      bottom: 0;
+      width: 100%;
+      text-align: center;
+      background: rgba(0, 0, 0, 0.5);
+      color: #fff;
+      font-size: 14px;
+      padding: 5px 0;
+      opacity: 0;
+      transition: opacity 0.3s ease;
+    }
+
+    .avatar-container:hover .upload-overlay {
+      opacity: 1;
+    }
+
+    /* Hide the actual file input */
+    #avatarUpload {
+      display: none;
+    }
+        
     </style>
 </head>
 <body>
@@ -111,10 +175,18 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['register'])) {
         <?php endif; ?>
 
         <form action="register.php" method="POST">
-            <input type="text" name="firstName" placeholder="First Name" required>
-            <input type="text" name="lastName" placeholder="Last Name" required>
-            <input type="text" name="username" placeholder="Username" required>
+        <div class="avatar-container" onclick="document.getElementById('avatarUpload').click();">
+        <!-- Default avatar image (change the source if needed) -->
+        <img id="avatarImage" src="../images/boy.png" alt="Avatar" />
+        <div class="upload-overlay">Upload Photo</div>
+      </div>
+      <!-- Hidden file input -->
+      <input type="file" id="avatarUpload" name="photo" accept="image/*" onchange="previewAvatar(event)" />
+            <input type="text" name="firstname" placeholder="First Name" required>
+            <input type="text" name="lastname" placeholder="Last Name" required>
             <input type="email" name="email" placeholder="Email" required>
+            <input type="text" name="username" placeholder="Username" required>
+            <input type="number" name="phone" placeholder="Phone" required>
             <input type="password" name="password" placeholder="Password" required>
             <input type="password" name="confirm_password" placeholder="Confirm Password" required>
             <button type="submit" name="register">Sign Up</button>
@@ -122,5 +194,18 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['register'])) {
 
         <p>Already have an account? <a href="login.php">Login</a></p>
     </div>
+    <script>
+    function previewAvatar(event) {
+      const input = event.target;
+      const avatarImage = document.getElementById('avatarImage');
+      if (input.files && input.files[0]) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+          avatarImage.src = e.target.result;
+        }
+        reader.readAsDataURL(input.files[0]);
+      }
+    }
+  </script>
 </body>
 </html>
